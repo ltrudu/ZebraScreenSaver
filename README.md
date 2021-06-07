@@ -1,4 +1,4 @@
-The NoSleep Service prevent the device to go on sleep mode when it is activated.
+The ScreenSaver Service prevent the device to go on sleep mode when it is activated.
 
 The service can be launched using the graphical user interface, intent actions or adb.
 
@@ -9,7 +9,7 @@ Power events occur when the device is connected to a power source (AC/USB/Wirele
 
 If the option "Start when charging / Stop when charging" is enabled, the power events will be monitored.
 
-The NoSleepService will be launched when the device is connected to a power source.
+The ScreenSaverService will be launched when the device is connected to a power source.
 
 
 The service respond to two intent actions (both uses the category: android.intent.category.DEFAULT)
