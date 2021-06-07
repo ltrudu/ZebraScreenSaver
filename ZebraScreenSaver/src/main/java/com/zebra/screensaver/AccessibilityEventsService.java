@@ -15,7 +15,7 @@ public class AccessibilityEventsService extends AccessibilityService {
     @Override
     protected void onServiceConnected() {
         AccessibilityServiceInfo info = getServiceInfo();
-        info.eventTypes |= AccessibilityEvent.TYPE_TOUCH_INTERACTION_START;
+        //info.eventTypes |= AccessibilityEvent.TYPE_TOUCH_INTERACTION_START;
         this.setServiceInfo(info);
         createOverlayWindowForUserEventsCatching();
         super.onServiceConnected();
@@ -44,14 +44,17 @@ public class AccessibilityEventsService extends AccessibilityService {
         });
     }
 
+
     @Override
        public void onAccessibilityEvent(AccessibilityEvent event) {
-           ScreenSaverService.logD("ACCESSIBILITY SERVICE : " + event.toString());
+        /* ScreenSaverService.logD("ACCESSIBILITY SERVICE : " + event.toString());
            if(event.getEventType() == AccessibilityEvent.TYPE_TOUCH_INTERACTION_START)
            {
                ScreenSaverService.resetCountdownTimer(this);
-           }
+           }*/
        }
+
+
     @Override
     public void onInterrupt() {
 

@@ -1,7 +1,5 @@
 package com.zebra.screensaver;
 
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -10,10 +8,13 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.ServiceInfo;
+import android.content.IntentFilter;
+import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.IBinder;
@@ -27,9 +28,10 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.accessibility.AccessibilityManager;
+import android.widget.TextView;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP;
@@ -49,11 +51,29 @@ public class ScreenSaverService extends Service {
     private static WindowManager mWindowManager = null;
     private static Handler mMainThreadHandler = null;
 
-    private static final int mTimerDuration = 10000;
+    private static final int mTimerDuration = 3000;
     private static final int mTimerInterval = 1000;
 
     private static CountDownTimer mCountdownTimer = null;
 
+    private static TextView tvTime = null;
+    private static TextView tvBatteryRemaining = null;
+    private static TextView tvBatteryHealth = null;
+    private static TextView tvWifiLevel = null;
+
+    private static UpdateScreenRunnable mUpdateScreenRunnable = null;
+    private static Thread mUpdateScreenThread = null;
+
+    private static String BATTERY_STATE_CHANGED_INTENT = "android.intent.action.BATTERY_CHANGED";
+    private static BatteryIntentReceiver mIntentReceiver;
+    private static IntentFilter mIntentFilter;
+
+    private static String mBatteryRemaining = null;
+    private static String mBatteryHealth = null;
+
+    private static String mWifiLevel = null;
+
+    private static WifiManager mWifimanager = null;
 
     public ScreenSaverService() {
     }
@@ -232,7 +252,7 @@ public class ScreenSaverService extends Service {
 
 
 
-    private static boolean createOverlayWindowToForceScreenOn(Context context) {
+    private static boolean createScreenSaverOverlayWindow(Context context) {
         try
         {
             // We save the current state of mView
@@ -248,6 +268,13 @@ public class ScreenSaverService extends Service {
             // mView = new View(context);
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mView = inflater.inflate(R.layout.screen_saver, null);
+
+            tvTime = mView.findViewById(R.id.tv_time);
+            tvBatteryHealth = mView.findViewById(R.id.tv_bhealth);
+            tvBatteryRemaining = mView.findViewById(R.id.tv_blevel);
+            tvWifiLevel = mView.findViewById(R.id.tv_wifilevel);
+
+            updateScreenValues();
 
             // We create a new layout with the following parameters
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
@@ -282,6 +309,32 @@ public class ScreenSaverService extends Service {
         return true;
     }
 
+    private static void updateScreenValues()
+    {
+        RunInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                // Update Time
+                Calendar c = Calendar.getInstance();
+                System.out.println("Current time => "+c.getTime());
+
+                SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String formattedDate = df.format(c.getTime());
+
+                // Now we display formattedDate value in TextView
+                tvTime.setText("Current Date and Time :\n"+formattedDate);
+
+                // Update Battery Values
+                tvBatteryRemaining.setText("Battery Level:\n" + mBatteryRemaining + "%");
+                tvBatteryHealth.setText("Battery Health:\n" + mBatteryHealth + "%");
+
+                // Update Wifi level
+                updateWifiInfo();
+                tvWifiLevel.setText("Wifi Level:\n" + mWifiLevel + "%");
+            }
+        });
+    }
+
     private static void cleanupWindow(Context context) {
         if(mView != null)
         {
@@ -295,7 +348,7 @@ public class ScreenSaverService extends Service {
         }
     }
 
-    private void RunInUIThread(Runnable runnable)
+    private static void RunInUIThread(Runnable runnable)
     {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(runnable);
@@ -307,10 +360,16 @@ public class ScreenSaverService extends Service {
     }
 
     private static void startScreenSaver(final Context context) {
-        // Create the screen saver window
-        createOverlayWindowToForceScreenOn(context);
         // Stop timer (we don't need it, now we'll wait for the next user touch event)
         stopCountdownTimer(context);
+        // Register battery receiver
+        registerBatteryReceiver(context);
+        // Create the screen saver window
+        createScreenSaverOverlayWindow(context);
+        // Initialize wifi manager
+        mWifimanager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        // Start the screen saver update thread
+        startUpdateThread();
         // This should be set only when screen saver is active
         mView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -324,6 +383,9 @@ public class ScreenSaverService extends Service {
 
     private static void stopScreenSaver(Context context)
     {
+        mWifimanager = null;
+        unregisterBatteryReceiver(context);
+        stopUpdateThread();
         cleanupWindow(context);
     }
 
@@ -374,5 +436,101 @@ public class ScreenSaverService extends Service {
     }
 
 
+
+    /**
+     * Screen saver methods & classes
+     */
+
+    static class UpdateScreenRunnable implements Runnable{
+        // @Override
+        public void run() {
+            while(!Thread.currentThread().isInterrupted()){
+                try {
+                    updateScreenValues();
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }catch(Exception e){
+                }
+            }
+        }
+    }
+
+    public static class BatteryIntentReceiver extends BroadcastReceiver
+    {
+        @Override
+        public void onReceive(Context context, Intent intent)
+        {
+            if (BATTERY_STATE_CHANGED_INTENT.equals(intent.getAction())) {
+                Bundle bundle = intent.getExtras();
+                updateBatteryInfo(bundle);
+            }
+        }
+    }
+
+    private static void registerBatteryReceiver(Context context)
+    {
+        if(mIntentReceiver == null) {
+            mIntentReceiver = new BatteryIntentReceiver();
+            mIntentFilter = new IntentFilter();
+            mIntentFilter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            context.registerReceiver(mIntentReceiver, mIntentFilter);
+        }
+    }
+
+    private static void unregisterBatteryReceiver(Context context)
+    {
+        if(mIntentReceiver != null) {
+            context.unregisterReceiver(mIntentReceiver);
+            mIntentFilter = null;
+            mIntentReceiver = null;
+        }
+    }
+
+
+    private static void startUpdateThread()
+    {
+        if(mUpdateScreenThread != null)
+        {
+            mUpdateScreenThread.start();
+        }
+        else
+        {
+            mUpdateScreenRunnable = new UpdateScreenRunnable();
+            mUpdateScreenThread = new Thread(mUpdateScreenRunnable);
+            mUpdateScreenThread.start();
+        }
+    }
+
+    private static void stopUpdateThread()
+    {
+        if(mUpdateScreenThread != null && mUpdateScreenThread.isAlive())
+        {
+            mUpdateScreenThread.interrupt();
+            mUpdateScreenThread = null;
+            mUpdateScreenRunnable = null;
+        }
+    }
+
+    private static void updateBatteryInfo(Bundle bundle)
+    {
+        if(bundle.containsKey("level"))
+        {
+            mBatteryRemaining = bundle.get("level").toString();
+        }
+        if(bundle.containsKey("health_percentage"))
+        {
+            mBatteryHealth = bundle.get("health_percentage").toString();
+        }
+    }
+
+    private static void updateWifiInfo()
+    {
+        if(mWifimanager != null) {
+            // Level of current connection
+            int rssi = mWifimanager.getConnectionInfo().getRssi();
+            mWifiLevel = String.valueOf(WifiManager.calculateSignalLevel(rssi, 100) + 1);
+        }
+    }
 
 }

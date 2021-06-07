@@ -1,18 +1,25 @@
 package com.zebra.screensaver;
 
+import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
@@ -59,6 +66,12 @@ public class MainActivity extends AppCompatActivity {
     private Switch mAutoStartServiceOnBootSwitch = null;
     private Switch mAutoStartServiceOnCraddleSwitch = null;
     public static MainActivity mMainActivity;
+
+    private static final int MANIFEST_PERMISSION = 1;
+    private static final String[] MANIFEST_PERMISSIONS_LIST = new String[]{
+            Manifest.permission.ACCESS_WIFI_STATE
+    };
+
 
 
     @Override
@@ -155,14 +168,6 @@ public class MainActivity extends AppCompatActivity {
         launchPowerEventsWatcherServiceIfNecessary();
     }
 
-    private void checkAccessibility()
-    {
-        if(isAccessibilityServiceEnabled(this, AccessibilityEventsService.class) == false)
-        {
-            startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
-        }
-    }
-
     public static boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
         AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
@@ -174,6 +179,48 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return false;
+    }
+
+    private void checkAccessibility()
+    {
+        if(isAccessibilitySettingsOn(this, AccessibilityEventsService.class) == false)
+        {
+            startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        }
+    }
+
+
+    public static boolean isAccessibilitySettingsOn(Context context, Class<? extends AccessibilityService> serviceClass) {
+        int accessibilityEnabled = 0;
+
+        final String service = serviceClass.getName();
+
+        boolean accessibilityFound = false;
+        try
+        {
+            accessibilityEnabled = Settings.Secure.getInt(context.getApplicationContext().getContentResolver(), Settings.Secure.ACCESSIBILITY_ENABLED);
+            ScreenSaverService.logD("accessibilityEnabled = " + accessibilityEnabled);
+        } catch (Settings.SettingNotFoundException e)
+        {
+            ScreenSaverService.logD("Error finding setting, default accessibility to not found: " + e.getMessage());
+        }
+        TextUtils.SimpleStringSplitter mStringColonSplitter = new TextUtils.SimpleStringSplitter(':');
+
+        if (accessibilityEnabled == 1) {
+            String settingValue = Settings.Secure.getString(context.getApplicationContext().getContentResolver(), Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+            if (settingValue != null) {
+                TextUtils.SimpleStringSplitter splitter = mStringColonSplitter;
+                splitter.setString(settingValue);
+                while (splitter.hasNext()) {
+                    String accessabilityService = splitter.next();
+
+                    if (accessabilityService.equalsIgnoreCase(service)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return accessibilityFound;
     }
 
     private void RequestPermission() {
@@ -191,7 +238,7 @@ public class MainActivity extends AppCompatActivity {
         else
         {
             // We already have the permission granted
-            checkAccessibility();
+            checkManifestPermissions();
         }
     }
 
@@ -205,11 +252,75 @@ public class MainActivity extends AppCompatActivity {
                     RequestPermission();
                 } else {
                     //Permission Granted !!
-                    checkAccessibility();
+                    checkManifestPermissions();
                 }
 
             }
         }
+    }
+
+    public void checkManifestPermissions()
+    {
+        boolean shouldNotRequestPermissions = true;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            for(String permission : MANIFEST_PERMISSIONS_LIST)
+            {
+                shouldNotRequestPermissions &= (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED);
+            }
+        }
+
+        if (shouldNotRequestPermissions) {
+            checkAccessibility();
+        }
+        else
+        {
+            ActivityCompat.requestPermissions(this,MANIFEST_PERMISSIONS_LIST, MANIFEST_PERMISSION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,  String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case MANIFEST_PERMISSION:
+                boolean allPermissionGranted = true;
+                for(int grantResult : grantResults)
+                {
+                    allPermissionGranted &= (grantResult == PackageManager.PERMISSION_GRANTED);
+                }
+                if (allPermissionGranted) {
+                    checkAccessibility();
+                } else {
+                    ShowAlertDialog(MainActivity.this, "Error", "Please grant the necessary permission to launch the application.");
+                }
+                return;
+        }
+    }
+
+    private void ShowAlertDialog(Context context, String title, String message)
+    {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                context);
+
+        // set title
+        alertDialogBuilder.setTitle(title);
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage(message)
+                .setCancelable(false)
+                .setPositiveButton("OK",new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int id) {
+                        // if this button is clicked, close
+                        // current activity
+                        checkManifestPermissions();
+                    }
+                });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 
     public void updateSwitches()
