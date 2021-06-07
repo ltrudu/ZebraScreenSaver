@@ -1,8 +1,11 @@
 package com.zebra.screensaver;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
 import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -11,9 +14,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+
+import java.util.List;
 
 // The service can be launched using the graphical user interface, intent actions or adb.
 //
@@ -149,6 +155,27 @@ public class MainActivity extends AppCompatActivity {
         launchPowerEventsWatcherServiceIfNecessary();
     }
 
+    private void checkAccessibility()
+    {
+        if(isAccessibilityServiceEnabled(this, AccessibilityEventsService.class) == false)
+        {
+            startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        }
+    }
+
+    public static boolean isAccessibilityServiceEnabled(Context context, Class<? extends AccessibilityService> service) {
+        AccessibilityManager am = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        List<AccessibilityServiceInfo> enabledServices = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK);
+
+        for (AccessibilityServiceInfo enabledService : enabledServices) {
+            ServiceInfo enabledServiceInfo = enabledService.getResolveInfo().serviceInfo;
+            if (enabledServiceInfo.packageName.equals(context.getPackageName()) && enabledServiceInfo.name.equals(service.getName()))
+                return true;
+        }
+
+        return false;
+    }
+
     private void RequestPermission() {
         // check if we have the permission already granted
         if (!Settings.canDrawOverlays(this)) {
@@ -163,7 +190,8 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-            // We already have the permission granted, we do nothing
+            // We already have the permission granted
+            checkAccessibility();
         }
     }
 
@@ -176,7 +204,8 @@ public class MainActivity extends AppCompatActivity {
                 if (!Settings.canDrawOverlays(this)) {
                     RequestPermission();
                 } else {
-                    //Permission Granted-System will work
+                    //Permission Granted !!
+                    checkAccessibility();
                 }
 
             }

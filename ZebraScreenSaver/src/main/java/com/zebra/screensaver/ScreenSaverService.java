@@ -1,5 +1,7 @@
 package com.zebra.screensaver;
 
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.KeyguardManager;
@@ -10,6 +12,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -24,6 +27,9 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.accessibility.AccessibilityManager;
+
+import java.util.List;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP;
@@ -43,10 +49,10 @@ public class ScreenSaverService extends Service {
     private static WindowManager mWindowManager = null;
     private static Handler mMainThreadHandler = null;
 
-    private static final int mTimerDuration = 5000;
+    private static final int mTimerDuration = 10000;
     private static final int mTimerInterval = 1000;
 
-    private CountDownTimer mCountdownTimer = null;
+    private static CountDownTimer mCountdownTimer = null;
 
 
     public ScreenSaverService() {
@@ -187,7 +193,7 @@ public class ScreenSaverService extends Service {
         return getString(R.string.nosleepservice_channel_id);
     }
 
-    private void logD(String message)
+    public static void logD(String message)
     {
         Log.d(Constants.TAG, message);
     }
@@ -246,21 +252,6 @@ public class ScreenSaverService extends Service {
             // We create a new layout with the following parameters
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 
-            // The smallest is the stealthiest
-            //layoutParams.width = 0;
-            //layoutParams.height = 0;
-
-            // Transparency is a plus... for a zero sized layout
-            //layoutParams.format = PixelFormat.TRANSPARENT;
-            //layoutParams.alpha = 40f;
-
-            // We force the window to be not focusable and not touchable to avoid
-            // disruptions with the other apps and the launcher
-            // In case of someone would manage to "touch" this zero sized sub pixel
-            //layoutParams.flags =
-            //        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-            //                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-//
             // The type toast will be accepted by the system without specific permissions
             int windowType = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
             layoutParams.type = windowType;
@@ -269,10 +260,10 @@ public class ScreenSaverService extends Service {
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+            layoutParams.flags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
             // screen saver
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
-
 
             mWindowManager.addView(mView, layoutParams);
             mView.setVisibility(View.VISIBLE);
@@ -292,9 +283,9 @@ public class ScreenSaverService extends Service {
     }
 
     private static void cleanupWindow(Context context) {
-        mView.setVisibility(View.GONE);
         if(mView != null)
         {
+            mView.setVisibility(View.GONE);
             mWindowManager.removeView(mView);
             mView = null;
         }
@@ -310,38 +301,78 @@ public class ScreenSaverService extends Service {
         handler.post(runnable);
     }
 
-    private void startScreenSaver(final Context context) {
+    public static boolean isScreenSaverActive()
+    {
+        return mView != null;
+    }
+
+    private static void startScreenSaver(final Context context) {
+        // Create the screen saver window
         createOverlayWindowToForceScreenOn(context);
+        // Stop timer (we don't need it, now we'll wait for the next user touch event)
+        stopCountdownTimer(context);
         // This should be set only when screen saver is active
         mView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 stopScreenSaver(context);
+                startCountdownTimer(context);
                 return true;
             }
         });
     }
 
-    private void stopScreenSaver(Context context)
+    private static void stopScreenSaver(Context context)
     {
         cleanupWindow(context);
     }
 
-    private void startCountdownTimer(final Context context)
+    private static void startCountdownTimer(final Context context)
     {
-        mCountdownTimer = new CountDownTimer(3000, 1000) {
-            public void onTick(long millisUntilFinished) {
-            }
+        logD("Start Countdown Timer");
+        if(mCountdownTimer == null) {
+            mCountdownTimer = new CountDownTimer(mTimerDuration, mTimerInterval) {
+                public void onTick(long millisUntilFinished) {
+                }
 
-            public void onFinish() {
-                logD("Screen Saver Timer Finished");
-                if(mView != null)
-                {
-                    // Show screen saver
+                public void onFinish() {
+                    logD("Screen Saver Timer Finished");
                     startScreenSaver(context);
                 }
-            }
-        }.start();
+            };
+        }
+        else
+        {
+            mCountdownTimer.cancel();
+        }
+        mCountdownTimer.start();
     }
+
+    protected static void resetCountdownTimer(final Context context)
+    {
+        logD("Reset Countdown Timer");
+        if(mCountdownTimer != null)
+        {
+            mCountdownTimer.cancel();
+            mCountdownTimer.start();
+        }
+        else
+        {
+            if(isScreenSaverActive() == false && isRunning(context))
+                startCountdownTimer(context);
+        }
+    }
+
+    private static void stopCountdownTimer(final Context context)
+    {
+        logD("Stop Countdown Timer");
+        if(mCountdownTimer != null)
+        {
+            mCountdownTimer.cancel();
+            mCountdownTimer = null;
+        }
+    }
+
+
 
 }
