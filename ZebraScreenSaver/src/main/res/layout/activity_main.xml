@@ -46,7 +46,7 @@
         android:layout_marginLeft="10dp"
         android:layout_marginTop="20dp"
         android:layout_marginRight="10dp"
-        android:text="The No Sleep Service will prevent the current device to go to sleep."
+        android:text="The Zebra Screen Saver Service will prevent your screen from damages by overriding the current display if the device is not used for a pre-defined amount of time."
         android:textAlignment="textStart"
         android:textSize="18sp" />
 
