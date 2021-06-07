@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">NoSleepService</string>
+    <string name="no_sleep_service_notification_title">NoSleepService</string>
+    <string name="no_sleep_service_notification_text">A service that prevent the screen to go to sleep.</string>
+    <string name="no_sleep_service_notification_tickle">NoSleepService</string>
+    <string name="serviceStopped">Service is stopped</string>
+    <string name="serviceStarted">Service is running</string>
+    <string name="startOnBoot">Start on boot</string>
+    <string name="doNothingOnBoot">Do nothing on boot</string>
+    <string name="startOnCharging">Start when charging \nStop when not charging</string>
+    <string name="doNothingOnCharging">Power events not\nmonitored</string>
+    <string name="nosleepservice_channel_name">No Sleep Service</string>
+    <string name="nosleepservice_channel_id">No Sleep Service channel</string>
+    <string name="appdescription">The No Sleep Service will prevent the device to go to sleep.\nService can be started with adb:\nadb shell am broadcast -a com.zebra.screensaver.startservice\nService can be stopped with adb:\nadb shell am broadcast -a com.zebra.screensaver.stopservice</string>
+    <string name="powereventswatcherservice_channel_name">No Sleep Service</string>
+    <string name="powereventswatcherservice_channel_id">No Sleep Service channel</string>
+    <string name="powereventswatcherservice_notification_title">NoSleepService Power Events Watcher</string>
+    <string name="powereventswatcherservice_notification_text">A service that watch for power events (docked, charging) to start or stop NoSleepService.</string>
+    <string name="powereventswatcherservice_notification_tickle">NoSleepService Power Events Watcher</string>
+
+</resources>
