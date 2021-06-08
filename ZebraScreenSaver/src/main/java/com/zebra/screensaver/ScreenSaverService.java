@@ -292,6 +292,14 @@ public class ScreenSaverService extends Service {
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mView = inflater.inflate(R.layout.screen_saver, null);
 
+            mView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                            | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN);
+
             mPlasma = Plasma.getInstance(context);
 
             mSurfaceView = (SurfaceView) mView.findViewById(R.id.SurfaceView);
@@ -315,10 +323,11 @@ public class ScreenSaverService extends Service {
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
-            layoutParams.flags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
 
             // screen saver
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+            //layoutParams.flags |= WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
+            layoutParams.flags |= WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
 
             mWindowManager.addView(mView, layoutParams);
             mView.setVisibility(View.VISIBLE);
@@ -344,7 +353,7 @@ public class ScreenSaverService extends Service {
             public void run() {
                 // Update Time
                 Calendar c = Calendar.getInstance();
-                System.out.println("Current time => "+c.getTime());
+                //System.out.println("Current time => "+c.getTime());
 
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String formattedDate = df.format(c.getTime());

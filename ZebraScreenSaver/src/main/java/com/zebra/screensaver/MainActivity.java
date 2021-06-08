@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkAccessibility()
     {
-        if(isAccessibilitySettingsOn(this, AccessibilityEventsService.class) == false)
+        if(isAccessibilityServiceEnabled(this, AccessibilityEventsService.class) == false)
         {
             startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
         }
