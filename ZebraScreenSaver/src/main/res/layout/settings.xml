@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <SurfaceView
+        android:id="@+id/SurfaceView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <ViewFlipper android:id="@+id/ViewFlipper"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1.0" >
+
+            <include
+                layout="@layout/settingsvalues" />
+
+            <include
+                layout="@layout/settingsprofiles" />
+
+        </ViewFlipper>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:background="#44000000"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" >
+
+            <Button
+                style="@style/CloseButton"
+                android:id="@+id/OKButton"
+                android:text="@string/button_close_app" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

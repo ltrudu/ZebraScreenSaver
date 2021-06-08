@@ -26,9 +26,13 @@ import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
+
+import org.clangen.gfx.plasma.Plasma;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -51,6 +55,9 @@ public class ScreenSaverService extends Service {
     private static WindowManager mWindowManager = null;
     private static Handler mMainThreadHandler = null;
 
+    private static Plasma mPlasma;
+    private static SurfaceView mSurfaceView = null;
+
     private static final int mTimerDuration = 3000;
     private static final int mTimerInterval = 1000;
 
@@ -60,6 +67,9 @@ public class ScreenSaverService extends Service {
     private static TextView tvBatteryRemaining = null;
     private static TextView tvBatteryHealth = null;
     private static TextView tvWifiLevel = null;
+
+    private static float mInfoAlpha = 0.0f;
+    private static float mAlphaSpeed = 0.1f;
 
     private static UpdateScreenRunnable mUpdateScreenRunnable = null;
     private static Thread mUpdateScreenThread = null;
@@ -250,7 +260,21 @@ public class ScreenSaverService extends Service {
         return false;
     }
 
+    private static SurfaceHolder.Callback mSurfaceHolderCallback = new SurfaceHolder.Callback() {
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            mPlasma.stop(holder);
+        }
 
+        public void surfaceCreated(SurfaceHolder holder) {
+            // surfaceChanged() always called at least once after created(), start it there.
+        }
+
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+            if (holder.getSurface().isValid()) {
+                mPlasma.start(holder);
+            }
+        }
+    };
 
     private static boolean createScreenSaverOverlayWindow(Context context) {
         try
@@ -263,11 +287,15 @@ public class ScreenSaverService extends Service {
             if(mWindowManager == null)
                 mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 
-
             // Create a new View for our layout
             // mView = new View(context);
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             mView = inflater.inflate(R.layout.screen_saver, null);
+
+            mPlasma = Plasma.getInstance(context);
+            
+            mSurfaceView = (SurfaceView) mView.findViewById(R.id.SurfaceView);
+            mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
 
             tvTime = mView.findViewById(R.id.tv_time);
             tvBatteryHealth = mView.findViewById(R.id.tv_bhealth);
@@ -331,6 +359,22 @@ public class ScreenSaverService extends Service {
                 // Update Wifi level
                 updateWifiInfo();
                 tvWifiLevel.setText("Wifi Level:\n" + mWifiLevel + "%");
+
+                mInfoAlpha += mAlphaSpeed;
+                if(mInfoAlpha >= 1.0f)
+                {
+                    mInfoAlpha = 1.0f;
+                    mAlphaSpeed *= -1.0f;
+                }
+                else if(mInfoAlpha <= 0.0f)
+                {
+                    mInfoAlpha = 0.0f;
+                    mAlphaSpeed *= -1.0f;
+                }
+                tvTime.setAlpha(mInfoAlpha);
+                tvBatteryRemaining.setAlpha(mInfoAlpha);
+                tvBatteryHealth.setAlpha(mInfoAlpha);
+                tvWifiLevel.setAlpha(mInfoAlpha);
             }
         });
     }

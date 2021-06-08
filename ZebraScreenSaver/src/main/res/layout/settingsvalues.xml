@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:layout_weight="1.0" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:padding="8dp" >
+
+        <!-- top buttons -->
+        <LinearLayout
+            style="@style/ButtonBar" >
+
+            <Button
+                style="@style/HeaderButton"
+                android:id="@+id/LibraryButton"
+                android:text="@string/button_effect_library" />
+
+            <Button
+                style="@style/HeaderButton"
+                android:id="@+id/SaveButton"
+                android:text="@string/button_save" />
+
+            <Button
+                style="@style/HeaderButton"
+                android:id="@+id/ResetButton"
+                android:text="@string/button_load_defaults" />
+
+        </LinearLayout>
+
+        <!-- color -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" >
+
+            <TextView
+                style="@style/HeaderView"
+                android:text="@string/label_color" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:stretchColumns="1">
+
+                <TableRow android:layout_width="wrap_content">
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/red" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/RedAmountSeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/green" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/GreenAmountSeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/blue" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/BlueAmountSeekBar" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" >
+
+            <TextView
+                style="@style/HeaderView"
+                android:text="@string/label_contrast" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:stretchColumns="1">
+
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/red" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/RedIntensitySeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/green" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/GreenIntensitySeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/blue" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/BlueIntensitySeekBar" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" >
+
+            <TextView
+                style="@style/HeaderView"
+                android:text="@string/label_frequency" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:stretchColumns="1">
+
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/red" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/RedWavelengthSeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/green" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/GreenWavelengthSeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/blue" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/BlueWavelengthSeekBar" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <!-- movement -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" >
+
+            <TextView
+                style="@style/HeaderView"
+                android:text="@string/label_movement" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:stretchColumns="1">
+
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_x_move_modifier_1" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/XMove1SeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_x_move_modifier_2" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/XMove2SeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_y_move_modifier_1" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/YMove1SeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_y_move_modifier_2" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/YMove2SeekBar" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+        <!-- shape -->
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1.0" >
+
+            <TextView
+                style="@style/HeaderView"
+                android:text="@string/label_shape" />
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="0dp"
+                android:padding="0dp"
+                android:stretchColumns="1">
+
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:layout_margin="0dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/label_size" />
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/SizeSeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_x_move_modifier_1" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/XShape1SeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_x_move_modifier_2" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/XShape2SeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_y_move_modifier_1" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/YShape1SeekBar" />
+                </TableRow>
+                <TableRow>
+                    <TextView
+                        style="@style/TableLayoutLabel"
+                        android:text="@string/label_y_move_modifier_2" />
+
+                    <SeekBar
+                        style="@style/TableSeekBar"
+                        android:id="@+id/YShape2SeekBar" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
