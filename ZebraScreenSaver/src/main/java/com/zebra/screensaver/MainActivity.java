@@ -95,8 +95,10 @@ public class MainActivity extends AppCompatActivity {
                 if(isChecked)
                 {
                     mStartStopServiceSwitch.setText(getString(R.string.serviceStarted));
-                    if(!ScreenSaverService.isRunning(MainActivity.this))
+                    if(!ScreenSaverService.isRunning(MainActivity.this)) {
                         ScreenSaverService.startService(MainActivity.this);
+                        ScreenSaverService.startScreenSaver(MainActivity.this);
+                    }
                 }
                 else
                 {

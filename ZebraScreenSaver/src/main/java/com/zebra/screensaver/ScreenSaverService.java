@@ -58,7 +58,7 @@ public class ScreenSaverService extends Service {
     private static Plasma mPlasma;
     private static SurfaceView mSurfaceView = null;
 
-    private static final int mTimerDuration = 3000;
+    private static final int mTimerDuration = 600000;
     private static final int mTimerInterval = 1000;
 
     private static CountDownTimer mCountdownTimer = null;
@@ -293,7 +293,7 @@ public class ScreenSaverService extends Service {
             mView = inflater.inflate(R.layout.screen_saver, null);
 
             mPlasma = Plasma.getInstance(context);
-            
+
             mSurfaceView = (SurfaceView) mView.findViewById(R.id.SurfaceView);
             mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
 
@@ -403,7 +403,7 @@ public class ScreenSaverService extends Service {
         return mView != null;
     }
 
-    private static void startScreenSaver(final Context context) {
+    public static void startScreenSaver(final Context context) {
         // Stop timer (we don't need it, now we'll wait for the next user touch event)
         stopCountdownTimer(context);
         // Register battery receiver
