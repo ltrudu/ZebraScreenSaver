@@ -1,3 +1,12 @@
+# -------------------------------------
+# WARNING
+The following software and code source is subject to the Zebra Open Source Licence
+It is intended to be used on Zebra devices only
+Using it on any other device brand is forbidden and does not respect the licence you'll
+agree to when you'll download / use this software
+# -------------------------------------
+
+
 The ScreenSaver Service prevent the device to go on sleep mode when it is activated.
 
 The service can be launched using the graphical user interface, intent actions or adb.
