@@ -1,10 +1,10 @@
 package com.zebra.screensaver;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.webkit.WebView;
 
-public class LicenceActivity extends AppCompatActivity {
+public class PlasmaLicenceActivity extends AppCompatActivity {
 
     WebView mWebView = null;
 
@@ -14,6 +14,6 @@ public class LicenceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_licence);
 
         mWebView = (WebView)findViewById(R.id.wvLicence);
-        mWebView.loadUrl("file:///android_asset/licence.html");
+        mWebView.loadUrl("file:///android_asset/plasmalicence.html");
     }
 }

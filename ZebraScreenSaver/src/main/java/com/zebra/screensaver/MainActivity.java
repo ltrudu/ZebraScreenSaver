@@ -20,11 +20,16 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+
+import org.clangen.gfx.plasma.SettingsActivity;
 
 import java.util.List;
 
@@ -83,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //Intent myIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/ltrudu/NoSleepService/blob/master/README.md"));
-                Intent myIntent = new Intent(MainActivity.this, LicenceActivity.class);
+                Intent myIntent = new Intent(MainActivity.this, ZebraLicenceActivity.class);
                 startActivity(myIntent);
             }
         });
@@ -160,6 +165,30 @@ public class MainActivity extends AppCompatActivity {
         updateSwitches();
         launchPowerEventsWatcherServiceIfNecessary();
         RequestPermission();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainactivitymenu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_settings:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+            case R.id.menu_zebra_licence:
+                startActivity(new Intent(this, ZebraLicenceActivity.class));
+                return true;
+            case R.id.menu_plasma_licence:
+                startActivity(new Intent(this, PlasmaLicenceActivity.class));
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

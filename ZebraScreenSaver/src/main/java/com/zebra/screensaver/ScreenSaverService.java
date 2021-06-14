@@ -12,6 +12,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -58,7 +59,8 @@ public class ScreenSaverService extends Service {
     private static Plasma mPlasma;
     private static SurfaceView mSurfaceView = null;
 
-    private static final int mTimerDuration = 600000;
+    private static final int TIMER_DURATION_DEFAULT_VALUE = 600000;
+    private static int mTimerDuration = 600000;
     private static final int mTimerInterval = 1000;
 
     private static CountDownTimer mCountdownTimer = null;
@@ -445,6 +447,9 @@ public class ScreenSaverService extends Service {
     private static void startCountdownTimer(final Context context)
     {
         logD("Start Countdown Timer");
+        SharedPreferences sharedpreferences = context.getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        mTimerDuration = sharedpreferences.getInt(Constants.SHARED_PREFERENCES_TIMEOUT, TIMER_DURATION_DEFAULT_VALUE);
+
         if(mCountdownTimer == null) {
             mCountdownTimer = new CountDownTimer(mTimerDuration, mTimerInterval) {
                 public void onTick(long millisUntilFinished) {

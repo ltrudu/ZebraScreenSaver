@@ -18,6 +18,8 @@
     <string name="powereventswatcherservice_notification_text">A service that watch for power events (docked, charging) to start or stop Zebra Screen Saver Service.</string>
     <string name="powereventswatcherservice_notification_tickle">Zebra Screen Saver Service Power Events Watcher</string>
 
+    <string name="settings_activity_title">Settings</string>
+
     <string name="pref_size">pref_size</string>
     <string name="pref_red_brightness">pref_red_amount</string>
     <string name="pref_red_contrast">pref_red_intensity</string>
@@ -65,6 +67,7 @@
     <string name="label_y_move_modifier_1">y modifier 1</string>
     <string name="label_x_move_modifier_2">x modifier 2</string>
     <string name="label_y_move_modifier_2">y modifier 2</string>
+    <string name="label_timeout">Screen Saver TimeOut:</string>
     <string name="label_color">brightness:</string>
     <string name="label_contrast">contrast:</string>
     <string name="label_intensity">intensity:</string>
@@ -72,6 +75,7 @@
     <string name="red">red</string>
     <string name="green">green</string>
     <string name="blue">blue</string>
+    <string name="timeout">timeout</string>
 
     <string name="checkbox_low_priority">low priority</string>
 
