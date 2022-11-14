@@ -38,7 +38,7 @@
             android:orientation="vertical"
             android:layout_width="fill_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" >
+            android:layout_weight="0.65" >
 
             <TextView
                 style="@style/HeaderView"
@@ -51,32 +51,23 @@
                 android:padding="0dp"
                 android:stretchColumns="1">
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <TableRow android:layout_width="wrap_content">
+                    <TableRow>
 
                         <TextView
                             android:id="@+id/tv_timeout"
                             style="@style/TableLayoutLabel"
                             android:text="@string/timeout" />
+
                         <SeekBar
                             android:id="@+id/sb_timeout"
                             style="@style/TableSeekBar" />
+
+                        <TextView
+                            android:id="@+id/tv_timeoutValue"
+                            style="@style/TableLayoutLabel"
+                            android:text="300s" />
+
                     </TableRow>
-
-                    <TextView
-                        android:id="@+id/tv_speed"
-                        style="@style/TableLayoutLabel"
-                        android:text="@string/timeout" />
-
-                    <SeekBar
-                        android:id="@+id/sb_speed"
-                        style="@style/TableSeekBar" />
-
-                </TableRow>
-
 
             </TableLayout>
 

@@ -3,6 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.zebra.screensaver">
 
+    <uses-permission android:name="com.symbol.emdk.permission.EMDK" />
+
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -19,11 +22,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ZebraLicenceActivity"></activity>
-        <activity android:name=".PlasmaLicenceActivity"></activity>
+        <uses-library android:name="com.symbol.emdk" />
+        <activity android:name=".ZebraLicenceActivity"
+            android:exported="true"></activity>
+        <activity android:name=".PlasmaLicenceActivity"
+            android:exported="true"></activity>
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleInstance">
+            android:launchMode="singleInstance"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -44,7 +51,8 @@
         <receiver
             android:name=".BootCompletedBroadcastReceiver"
             android:enabled="true"
-            android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
 
@@ -53,7 +61,8 @@
         </receiver>
         <receiver
             android:name=".StartServiceBroadcastReceiver"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.zebra.screensaver.startservice" />
 
@@ -62,7 +71,8 @@
         </receiver>
         <receiver
             android:name=".StopServiceBroadcastReceiver"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.zebra.screensaver.stopservice" />
 
@@ -71,7 +81,8 @@
         </receiver>
         <receiver
             android:name=".SetupServiceBroadcastReceiver"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.zebra.screensaver.setupservice" />
 
@@ -81,7 +92,8 @@
         <!-- Register PowerConnectionReceiver in AndroidManifest for build < Oreo -->
         <receiver
             android:name=".PowerConnectionReceiver"
-            android:enabled="true">
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
                 <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
@@ -89,7 +101,8 @@
             </intent-filter>
         </receiver>
         <service android:name=".AccessibilityEventsService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
             </intent-filter>

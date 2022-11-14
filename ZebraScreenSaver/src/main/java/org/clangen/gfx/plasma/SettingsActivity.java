@@ -54,6 +54,7 @@ public class SettingsActivity extends Activity {
     private static final int MAX_COLOR = 255;
     private static final int MAX_SCALAR = 70;
     private static final int MAX_WAVELENGTH = 140;
+    private static final int MAX_TIMEOUT = 3*60*60; //3 hours
 
     private static boolean sIsActive = false;
 
@@ -68,6 +69,7 @@ public class SettingsActivity extends Activity {
 
     private static class Views {
         SurfaceView mSurfaceView;
+        SeekBar mTimeoutSeekBar;
         SeekBar mSizeSeekBar;
         SeekBar mXMoveModifier1SeekBar;
         SeekBar mXMoveModifier2SeekBar;
@@ -110,6 +112,7 @@ public class SettingsActivity extends Activity {
         mViews.mSurfaceView.getHolder().addCallback(mSurfaceHolderCallback);
 
         mViews.mSizeSeekBar = configureSeekBar(R.id.SizeSeekBar, SIZE_STEP_COUNT);
+        mViews.mTimeoutSeekBar = configureSeekBar(R.id.sb_timeout, MAX_TIMEOUT);
 
         mViews.mXMoveModifier2SeekBar = configureSeekBar(R.id.XMove1SeekBar, TOTAL_MOVEMENT_STEPS);
         mViews.mXMoveModifier1SeekBar = configureSeekBar(R.id.XMove2SeekBar, TOTAL_MOVEMENT_STEPS);
@@ -202,6 +205,14 @@ public class SettingsActivity extends Activity {
 
     private SeekBar configureSeekBar(int id, int max) {
         SeekBar seekbar = (SeekBar) findViewById(id);
+        seekbar.setMax(max);
+        seekbar.setOnSeekBarChangeListener(mOnSeekBarChangedListener);
+        return seekbar;
+    }
+
+    private SeekBar configureSeekBar(int id, int min, int max) {
+        SeekBar seekbar = (SeekBar) findViewById(id);
+        seekbar.setMin(min);
         seekbar.setMax(max);
         seekbar.setOnSeekBarChangeListener(mOnSeekBarChangedListener);
         return seekbar;
@@ -563,7 +574,11 @@ public class SettingsActivity extends Activity {
 
         public void onStopTrackingTouch(SeekBar seekBar) {
             int progress = seekBar.getProgress();
-            if (seekBar == mViews.mSizeSeekBar) {
+            if(seekBar == mViews.mTimeoutSeekBar)
+            {
+                //TODO
+            }
+            else if (seekBar == mViews.mSizeSeekBar) {
                 mEffect.setSize(MIN_SIZE + (SIZE_STEP_COUNT - progress));
             }
             else if (seekBar == mViews.mXMoveModifier1SeekBar) {

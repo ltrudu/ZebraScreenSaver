@@ -13,11 +13,11 @@ import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -28,6 +28,11 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
+import android.widget.Toast;
+
+import com.zebra.criticalpermissionshelper.CriticalPermissionsHelper;
+import com.zebra.criticalpermissionshelper.EPermissionType;
+import com.zebra.criticalpermissionshelper.IResultCallbacks;
 
 import org.clangen.gfx.plasma.SettingsActivity;
 
@@ -66,7 +71,6 @@ import java.util.List;
 //          The extras value can be set to "true" or "1" to enable the option and "false" or "0" to disable the option.
 public class MainActivity extends AppCompatActivity {
 
-    private static int ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE = 203;
     private Switch mStartStopServiceSwitch = null;
     private Switch mAutoStartServiceOnBootSwitch = null;
     private Switch mAutoStartServiceOnCraddleSwitch = null;
@@ -164,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateSwitches();
         launchPowerEventsWatcherServiceIfNecessary();
-        RequestPermission();
+        RequestOverlayPermission();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -254,40 +258,45 @@ public class MainActivity extends AppCompatActivity {
         return accessibilityFound;
     }
 
-    private void RequestPermission() {
+    private void RequestOverlayPermission() {
         // check if we have the permission already granted
-        if (!Settings.canDrawOverlays(this)) {
-            // Check if Android M or higher
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                // Show alert dialog to the user saying a separate permission is needed
-                // Launch the settings activity if the user prefers
-                Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:" + this.getPackageName()));
-                startActivityForResult(intent, ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE);
+        CriticalPermissionsHelper.verifyPermission(this, EPermissionType.SYSTEM_ALERT_WINDOW, new IResultCallbacks() {
+            @Override
+            public void onSuccess(String message, String resultXML) {
+                // We already have the permission granted
+                checkManifestPermissions();
             }
-        }
-        else
-        {
-            // We already have the permission granted
-            checkManifestPermissions();
-        }
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+            @Override
+            public void onError(String message, String resultXML) {
+                if(message.contains("Permission is not granted!")) {
+                    CriticalPermissionsHelper.grantPermission(MainActivity.this, EPermissionType.SYSTEM_ALERT_WINDOW, new IResultCallbacks() {
+                        @Override
+                        public void onSuccess(String message, String resultXML) {
+                            checkManifestPermissions();
+                        }
 
-        if (requestCode == ACTION_MANAGE_OVERLAY_PERMISSION_REQUEST_CODE) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!Settings.canDrawOverlays(this)) {
-                    RequestPermission();
-                } else {
-                    //Permission Granted !!
-                    checkManifestPermissions();
+                        @Override
+                        public void onError(String message, String resultXML) {
+                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
+                            MainActivity.this.finishAffinity();
+                        }
+
+                        @Override
+                        public void onDebugStatus(String message) {
+
+                        }
+                    });
+
                 }
 
             }
-        }
+
+            @Override
+            public void onDebugStatus(String message) {
+
+            }
+        });
     }
 
     public void checkManifestPermissions()

@@ -21,9 +21,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.support.annotation.RequiresApi;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -40,7 +40,7 @@ import java.util.Calendar;
 
 import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP;
-import static android.support.v4.app.NotificationCompat.PRIORITY_MIN;
+import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
 
 public class ScreenSaverService extends Service {
     private static final int SERVICE_ID = 122315;
@@ -59,8 +59,8 @@ public class ScreenSaverService extends Service {
     private static Plasma mPlasma;
     private static SurfaceView mSurfaceView = null;
 
-    private static final int TIMER_DURATION_DEFAULT_VALUE = 600000;
-    private static int mTimerDuration = 600000;
+    private static final int TIMER_DURATION_DEFAULT_VALUE = 20000;
+    private static int mTimerDuration = 20000;
     private static final int mTimerInterval = 1000;
 
     private static CountDownTimer mCountdownTimer = null;
@@ -121,7 +121,7 @@ public class ScreenSaverService extends Service {
         stopService();
     }
 
-    @SuppressLint({"Wakelock"})
+    @SuppressLint({"Wakelock", "MissingPermission"})
     private void startService()
     {
         logD("startService");
@@ -325,6 +325,9 @@ public class ScreenSaverService extends Service {
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_ALLOW_LOCK_WHILE_SCREEN_ON;
+            layoutParams.flags |= WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;
+            layoutParams.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+            layoutParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
 
             // screen saver
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
