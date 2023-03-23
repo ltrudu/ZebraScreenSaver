@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
 
         updateSwitches();
         launchPowerEventsWatcherServiceIfNecessary();
-        RequestOverlayPermission();
+        checkManifestPermissions();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -216,6 +216,7 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
+    /*
     private void checkAccessibility()
     {
         if(isAccessibilityServiceEnabled(this, AccessibilityEventsService.class) == false)
@@ -223,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS));
         }
     }
+    */
 
 
     public static boolean isAccessibilitySettingsOn(Context context, Class<? extends AccessibilityService> serviceClass) {
@@ -258,47 +260,6 @@ public class MainActivity extends AppCompatActivity {
         return accessibilityFound;
     }
 
-    private void RequestOverlayPermission() {
-        // check if we have the permission already granted
-        CriticalPermissionsHelper.verifyPermission(this, EPermissionType.SYSTEM_ALERT_WINDOW, new IResultCallbacks() {
-            @Override
-            public void onSuccess(String message, String resultXML) {
-                // We already have the permission granted
-                checkManifestPermissions();
-            }
-
-            @Override
-            public void onError(String message, String resultXML) {
-                if(message.contains("Permission is not granted!")) {
-                    CriticalPermissionsHelper.grantPermission(MainActivity.this, EPermissionType.SYSTEM_ALERT_WINDOW, new IResultCallbacks() {
-                        @Override
-                        public void onSuccess(String message, String resultXML) {
-                            checkManifestPermissions();
-                        }
-
-                        @Override
-                        public void onError(String message, String resultXML) {
-                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
-                            MainActivity.this.finishAffinity();
-                        }
-
-                        @Override
-                        public void onDebugStatus(String message) {
-
-                        }
-                    });
-
-                }
-
-            }
-
-            @Override
-            public void onDebugStatus(String message) {
-
-            }
-        });
-    }
-
     public void checkManifestPermissions()
     {
         boolean shouldNotRequestPermissions = true;
@@ -310,7 +271,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (shouldNotRequestPermissions) {
-            checkAccessibility();
+            //checkAccessibility();
         }
         else
         {
@@ -328,7 +289,7 @@ public class MainActivity extends AppCompatActivity {
                     allPermissionGranted &= (grantResult == PackageManager.PERMISSION_GRANTED);
                 }
                 if (allPermissionGranted) {
-                    checkAccessibility();
+                    //checkAccessibility();
                 } else {
                     ShowAlertDialog(MainActivity.this, "Error", "Please grant the necessary permission to launch the application.");
                 }

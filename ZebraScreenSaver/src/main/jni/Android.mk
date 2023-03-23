@@ -17,7 +17,7 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_MODULE    := plasma 
-LOCAL_SRC_FILES := plasma.c
+LOCAL_SRC_FILES := plasma.cpp
 LOCAL_LDLIBS := -Lbuild/platforms/android-1.5/arch-arm/usr/lib -llog
 
 include $(BUILD_SHARED_LIBRARY)
