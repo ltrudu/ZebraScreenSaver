@@ -81,7 +81,7 @@ void Java_org_clangen_gfx_plasma_Plasma_nativeSetPalette(
     if (_palette == 0) {
         _palette = (jint*) malloc(count * sizeof(jint));
     }
-    (*env)->GetIntArrayRegion(env, palette, 0, count, _palette);
+    (*env).GetIntArrayRegion(palette, 0, count, _palette);
     //__android_log_print(ANDROID_LOG_INFO, "Plasma", "nativeSetPalette end");
 }
 
@@ -104,7 +104,7 @@ void Java_org_clangen_gfx_plasma_Plasma_nativeNextFrame(
     halfWidth = width / 2;
     halfHeight = height / 2;
     totalPixels = width * height;     
-    target = (jint *) (*env)->GetDirectBufferAddress(env, buffer);
+    target = (jint *) (*env).GetDirectBufferAddress(buffer);
 
     //__android_log_print(ANDROID_LOG_INFO, "Plasma", "nativeNextFrame %x %d %d", target, width, height);
 
