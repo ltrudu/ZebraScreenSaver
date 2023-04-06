@@ -37,10 +37,7 @@ public class PowerConnectionReceiver extends BroadcastReceiver {
                         context.startService(myIntent);
                     }
                     // Update GUI if necessary
-                    if(MainActivity.mMainActivity != null) // The application default activity has been opened
-                    {
-                        MainActivity.mMainActivity.updateSwitches();
-                    }
+                    SetupActivity.updateGUI();
                 }
                 else
                 {
@@ -50,10 +47,7 @@ public class PowerConnectionReceiver extends BroadcastReceiver {
                     context.stopService(myIntent);
 
                     // Update GUI if necessary
-                    if(MainActivity.mMainActivity != null) // The application default activity has been opened
-                    {
-                        MainActivity.mMainActivity.updateSwitches();
-                    }
+                    SetupActivity.updateGUI();
                 }
 
             }

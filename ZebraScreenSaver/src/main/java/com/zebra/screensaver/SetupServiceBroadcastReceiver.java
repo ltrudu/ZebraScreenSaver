@@ -20,7 +20,7 @@ public class SetupServiceBroadcastReceiver extends BroadcastReceiver {
             boolean bStartOnBoot = sStartOnBoot.equalsIgnoreCase("true") || sStartOnBoot.equalsIgnoreCase("1");
             setSharedPreference(context, Constants.SHARED_PREFERENCES_START_SERVICE_ON_BOOT, bStartOnBoot);
             // Update GUI if necessary
-            MainActivity.updateGUISwitchesIfNecessary();
+            SetupActivity.updateGUI();
         }
         else
         {
@@ -45,7 +45,7 @@ public class SetupServiceBroadcastReceiver extends BroadcastReceiver {
                     ScreenSaverService.startService(context);
             }
             // Update GUI if necessary
-            MainActivity.updateGUISwitchesIfNecessary();
+            SetupActivity.updateGUI();
         }
         else
         {
