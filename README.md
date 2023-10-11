@@ -1,3 +1,6 @@
+*Please be aware that this library / application / sample is provided as a community project without any guarantee of support*
+=========================================================
+
 # -------------------------------------
 # WARNING
 The following software and code source is subject to the Zebra Open Source Licence.
