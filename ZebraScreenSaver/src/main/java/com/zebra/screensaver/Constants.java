@@ -9,6 +9,8 @@ import android.util.Log;
 public class Constants {
     public static final String TAG  ="ScreenSaverService";
 
+    public static final String DISMISS_NOTIFICATION_ACTION = "com.zebra.foregroundservice.DISMISS_NOTIFICATION_ACTION";
+
     // Shared preference keys
     public static final String SHARED_PREFERENCES_NAME = "ScreenSaverService";
     public static final String SHARED_PREFERENCES_START_SERVICE_ON_BOOT = "startonboot";

@@ -99,16 +99,15 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_settings:
-                startActivity(new Intent(this, SetupActivity.class));
-                return true;
-            case R.id.menu_zebra_licence:
-                startActivity(new Intent(this, ZebraLicenceActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        if (id == R.id.menu_settings) {
+            startActivity(new Intent(this, SetupActivity.class));
+            return true;
+        } else if (id == R.id.menu_zebra_licence) {
+            startActivity(new Intent(this, ZebraLicenceActivity.class));
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override

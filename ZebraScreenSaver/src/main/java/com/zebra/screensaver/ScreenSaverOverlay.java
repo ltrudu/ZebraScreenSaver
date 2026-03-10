@@ -26,7 +26,7 @@ public class ScreenSaverOverlay {
     private static float mCustomBackgroundMinAlpha = 0.15f;
 
     private static float mMovingOverlayAlpha = 0.5f;
-    private static float mMovingOverlayAlphaSpeed = 0.001f;
+    private static float mMovingOverlayAlphaSpeed = 0.01f;
 
     private static float mMovingOverlayMaxAlpha = 0.55f;
     private static float mMovingOverlayMinAlpha = 0.25f;
@@ -153,7 +153,7 @@ public class ScreenSaverOverlay {
     private static Thread mUpdateMovingOverlayAlphaThread = null;
     private static int mUpdateMovingOverlayAlphaSleep = 20;
     private static Thread mUpdateMovingOverlayPositionThread = null;
-    private static int mUpdateMovingOverlayPositionSleep = 1000;
+    private static int mUpdateMovingOverlayPositionSleep = 20;
 
     public static boolean isViewActive()
     {
@@ -286,9 +286,7 @@ public class ScreenSaverOverlay {
             // We create a new layout with the following parameters
             WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
 
-            // The type toast will be accepted by the system without specific permissions
-            int windowType = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY : WindowManager.LayoutParams.TYPE_PHONE;
-            layoutParams.type = windowType;
+            layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
             layoutParams.flags |= WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD;

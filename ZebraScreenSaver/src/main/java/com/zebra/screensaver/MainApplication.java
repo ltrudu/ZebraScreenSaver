@@ -25,6 +25,23 @@ public class MainApplication extends Application {
         CriticalPermissionsHelper.grantPermission(MainApplication.this, EPermissionType.SYSTEM_ALERT_WINDOW, new IResultCallbacks() {
             @Override
             public void onSuccess(String message, String resultXML) {
+                CriticalPermissionsHelper.grantPermission(MainApplication.this, EPermissionType.ALL_DANGEROUS_PERMISSIONS, new IResultCallbacks() {
+                    @Override
+                    public void onSuccess(String message, String resultXML) {
+
+                    }
+
+                    @Override
+                    public void onError(String message, String resultXML) {
+                        Toast.makeText(MainApplication.this, message, Toast.LENGTH_LONG).show();
+                        System.exit(0);
+                    }
+
+                    @Override
+                    public void onDebugStatus(String message) {
+
+                    }
+                });
             }
 
             @Override

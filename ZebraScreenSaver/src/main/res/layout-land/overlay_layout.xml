@@ -28,19 +28,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:fontFamily="@font/crooked_hooks"
-            android:text="SCANNEZ LE PRODUIT\nPOUR CONNAITRE\n SON PRIX !"
+            android:fontFamily="sans-serif"
+            android:text="Touch The Screen To Activate"
             android:textAlignment="center"
             android:textColor="#FFFFFF"
-            android:textSize="180dp" />
-
-        <ImageView
-            android:id="@+id/imageView2"
-            android:layout_width="80dp"
-            android:layout_height="80dp"
-            android:layout_below="@id/overlayText"
-            android:layout_centerInParent="true"
-            app:srcCompat="@drawable/chevrons" />
+            android:textSize="20sp" />
 
     </RelativeLayout>
 

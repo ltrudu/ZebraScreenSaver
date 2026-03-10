@@ -11,28 +11,23 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ServiceInfo;
+import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.PowerManager;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import java.util.Random;
-
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
-import static android.os.PowerManager.ACQUIRE_CAUSES_WAKEUP;
 import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
+import static com.zebra.screensaver.Constants.DISMISS_NOTIFICATION_ACTION;
 
 public class ScreenSaverService extends Service {
     private static final int SERVICE_ID = 122315;
@@ -73,7 +68,14 @@ public class ScreenSaverService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         logD("onStartCommand");
         super.onStartCommand(intent, flags, startId);
-        startService();
+        if(intent != null && intent.getAction() == DISMISS_NOTIFICATION_ACTION)
+        {
+            createServiceNotificationChannel();
+            StartForegroundService();
+        }
+        else {
+            startService();
+        }
         return Service.START_STICKY;
     }
 
@@ -93,58 +95,12 @@ public class ScreenSaverService extends Service {
         logD("startService");
         try
         {
-            Intent mainActivityIntent = new Intent(this, MainActivity.class);
-            PendingIntent pendingIntent = PendingIntent.getActivity(
-                    getApplicationContext(),
-                    0,
-                    mainActivityIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+            createServiceNotificationChannel();
 
-            // Create the Foreground Service
-            String channelId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? createNotificationChannel(mNotificationManager) : "";
-
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
-            mNotification = notificationBuilder.setOngoing(true)
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setContentTitle(getString(R.string.no_sleep_service_notification_title))
-                    .setContentText(getString(R.string.no_sleep_service_notification_text))
-                    .setTicker(getString(R.string.no_sleep_service_notification_tickle))
-                    .setPriority(PRIORITY_MIN)
-                    .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                    .setContentIntent(pendingIntent)
-                    .build();
-
-            TaskStackBuilder localTaskStackBuilder = TaskStackBuilder.create(this);
-            localTaskStackBuilder.addParentStack(MainActivity.class);
-            localTaskStackBuilder.addNextIntent(mainActivityIntent);
-            notificationBuilder.setContentIntent(localTaskStackBuilder.getPendingIntent(0, FLAG_UPDATE_CURRENT));
-
-            try{
-                startForeground(SERVICE_ID, mNotification);
-
-            }
-            catch(Exception e)
-            {
-                Log.d("toto", e.getMessage());
-            }
             // Start foreground service
+            StartForegroundService();
 
-            // Release current wakelock if any
-            if ((this.mWakeLock != null) && (this.mWakeLock.isHeld())) {
-                this.mWakeLock.release();
-            }
-
-            // Acquire wakelock for service
-            this.mWakeLock = this.mPowerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | ACQUIRE_CAUSES_WAKEUP , "zebra:ScreenSaverService");
-            this.mWakeLock.setReferenceCounted(false);
-            this.mWakeLock.acquire();
-
-            // Disable keyguard
-            this.mKeyguardManager.newKeyguardLock("zebra:ScreenSaverService").disableKeyguard();
-
-            //createOverlayWindowToForceScreenOn(this);
-            startCountdownTimer(this);
-            logD("startService:Service started without error.");
+            StartServiceCustomCode();
 
             //mNotificationManager.notify(SERVICE_ID, mNotification );
         }
@@ -155,6 +111,81 @@ public class ScreenSaverService extends Service {
         }
 
 
+    }
+
+    private void StartServiceCustomCode() {
+        // Release current wakelock if any
+        if ((this.mWakeLock != null) && (this.mWakeLock.isHeld())) {
+            this.mWakeLock.release();
+        }
+
+        // Acquire wakelock for service
+        this.mWakeLock = this.mPowerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP , "zebra:ScreenSaverService");
+        this.mWakeLock.setReferenceCounted(false);
+        this.mWakeLock.acquire();
+
+        // Disable keyguard
+        this.mKeyguardManager.newKeyguardLock("zebra:ScreenSaverService").disableKeyguard();
+
+        //createOverlayWindowToForceScreenOn(this);
+        startCountdownTimer(this);
+        logD("startService:Service started without error.");
+    }
+
+    private void StartForegroundService() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) { // Android 14+
+            ServiceCompat.startForeground(
+                    this,
+                    SERVICE_ID,
+                    mNotification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE // Example type
+            );
+        } else {
+            startForeground(SERVICE_ID, mNotification);
+        }
+    }
+
+    private void createServiceNotificationChannel() {
+        Intent mainActivityIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(
+                getApplicationContext(),
+                0,
+                mainActivityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // Create a dismiss intent
+        // Dismiss Intent
+        Intent dismissIntent = new Intent(this, ScreenSaverService.class);
+        dismissIntent.setAction(DISMISS_NOTIFICATION_ACTION);
+
+        PendingIntent dismissPendingIntent = PendingIntent.getService(
+                this,
+                0,
+                dismissIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+        );
+
+        // Create the Foreground Service
+        String channelId = createServiceNotificationChannel(mNotificationManager);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
+        mNotification = notificationBuilder.setOngoing(true)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(getString(R.string.no_sleep_service_notification_title))
+                .setContentText(getString(R.string.no_sleep_service_notification_text))
+                .setTicker(getString(R.string.no_sleep_service_notification_tickle))
+                .setPriority(PRIORITY_MIN)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setContentIntent(pendingIntent)
+                .setDeleteIntent(dismissPendingIntent)
+                .setOngoing(true)
+                .build();
+
+        TaskStackBuilder localTaskStackBuilder = TaskStackBuilder.create(this);
+        localTaskStackBuilder.addParentStack(MainActivity.class);
+        localTaskStackBuilder.addNextIntent(mainActivityIntent);
+        notificationBuilder.setContentIntent(localTaskStackBuilder.getPendingIntent(0,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
     }
 
     private void stopService()
@@ -179,7 +210,7 @@ public class ScreenSaverService extends Service {
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
-    private String createNotificationChannel(NotificationManager notificationManager){
+    private String createServiceNotificationChannel(NotificationManager notificationManager){
         NotificationChannel channel = new NotificationChannel(getString(R.string.nosleepservice_channel_id), getString(R.string.nosleepservice_channel_name), NotificationManager.IMPORTANCE_HIGH);
         // omitted the LED color
         channel.setImportance(NotificationManager.IMPORTANCE_NONE);
@@ -196,17 +227,7 @@ public class ScreenSaverService extends Service {
     public static void startService(Context context)
     {
         Intent myIntent = new Intent(context, ScreenSaverService.class);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            // Use start foreground service to prevent the runtime error:
-            // "not allowed to start service intent app is in background"
-            // to happen when running on OS >= Oreo
-            context.startForegroundService(myIntent);
-        }
-        else
-        {
-            context.startService(myIntent);
-        }
+        context.startForegroundService(myIntent);
     }
 
     public static void stopService(Context context)
