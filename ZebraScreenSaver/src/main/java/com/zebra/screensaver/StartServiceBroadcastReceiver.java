@@ -12,6 +12,6 @@ public class StartServiceBroadcastReceiver extends BroadcastReceiver {
         Log.d(Constants.TAG, "StartServiceBroadcastReceiver::onReceive");
         // Start service
         ScreenSaverService.startService(context);
-        MainActivity.updateGUISwitchesIfNecessary();
+        SetupActivity.updateGUI();
     }
 }

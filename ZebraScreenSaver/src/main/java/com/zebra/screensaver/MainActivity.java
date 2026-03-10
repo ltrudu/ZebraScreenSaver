@@ -9,11 +9,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
-import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
-import androidx.annotation.Nullable;
+
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.AlertDialog;
@@ -28,13 +27,6 @@ import android.view.accessibility.AccessibilityManager;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.Toast;
-
-import com.zebra.criticalpermissionshelper.CriticalPermissionsHelper;
-import com.zebra.criticalpermissionshelper.EPermissionType;
-import com.zebra.criticalpermissionshelper.IResultCallbacks;
-
-import org.clangen.gfx.plasma.SettingsActivity;
 
 import java.util.List;
 
@@ -71,9 +63,6 @@ import java.util.List;
 //          The extras value can be set to "true" or "1" to enable the option and "false" or "0" to disable the option.
 public class MainActivity extends AppCompatActivity {
 
-    private Switch mStartStopServiceSwitch = null;
-    private Switch mAutoStartServiceOnBootSwitch = null;
-    private Switch mAutoStartServiceOnCraddleSwitch = null;
     public static MainActivity mMainActivity;
 
     private static final int MANIFEST_PERMISSION = 1;
@@ -97,76 +86,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mStartStopServiceSwitch = (Switch)findViewById(R.id.startStopServiceSwitch);
-        mStartStopServiceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
-                {
-                    mStartStopServiceSwitch.setText(getString(R.string.serviceStarted));
-                    if(!ScreenSaverService.isRunning(MainActivity.this)) {
-                        ScreenSaverService.startService(MainActivity.this);
-                        ScreenSaverService.startScreenSaver(MainActivity.this);
-                    }
-                }
-                else
-                {
-                    mStartStopServiceSwitch.setText(getString(R.string.serviceStopped));
-                    if(ScreenSaverService.isRunning(MainActivity.this))
-                        ScreenSaverService.stopService(MainActivity.this);
-                }
-            }
-        });
-
-        mAutoStartServiceOnBootSwitch = (Switch)findViewById(R.id.startOnBootSwitch);
-        mAutoStartServiceOnBootSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
-                {
-                    mAutoStartServiceOnBootSwitch.setText(getString(R.string.startOnBoot));
-                }
-                else
-                {
-                    mAutoStartServiceOnBootSwitch.setText(getString(R.string.doNothingOnBoot));
-                }
-                SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putBoolean(Constants.SHARED_PREFERENCES_START_SERVICE_ON_BOOT, isChecked);
-                editor.commit();
-            }
-        });
-
-        mAutoStartServiceOnCraddleSwitch = (Switch)findViewById(R.id.startOnCraddle);
-        mAutoStartServiceOnCraddleSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked)
-                {
-                    mAutoStartServiceOnCraddleSwitch.setText(getString(R.string.startOnCharging));
-                    // Launch the watcher service
-                    if(!PowerEventsWatcherService.isRunning(MainActivity.this))
-                        PowerEventsWatcherService.startService(MainActivity.this);
-                    // Let's check if we are already connected on power to launch ScreenSaverService if necessary
-                    BatteryManager myBatteryManager = (BatteryManager) MainActivity.this.getSystemService(Context.BATTERY_SERVICE);
-                    if(myBatteryManager.isCharging() && !ScreenSaverService.isRunning(MainActivity.this))
-                        ScreenSaverService.startService(MainActivity.this);
-                }
-                else
-                {
-                    mAutoStartServiceOnCraddleSwitch.setText(getString(R.string.doNothingOnCharging));
-                    // Stop the watcher service
-                    if(PowerEventsWatcherService.isRunning(MainActivity.this))
-                        PowerEventsWatcherService.stopService(MainActivity.this);
-                }
-                SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putBoolean(Constants.SHARED_PREFERENCES_START_SERVICE_ON_CHARGING, isChecked);
-                editor.commit();
-            }
-        });
-
-        updateSwitches();
         launchPowerEventsWatcherServiceIfNecessary();
         checkManifestPermissions();
     }
@@ -180,26 +99,21 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_settings:
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-            case R.id.menu_zebra_licence:
-                startActivity(new Intent(this, ZebraLicenceActivity.class));
-                return true;
-            case R.id.menu_plasma_licence:
-                startActivity(new Intent(this, PlasmaLicenceActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int id = item.getItemId();
+        if (id == R.id.menu_settings) {
+            startActivity(new Intent(this, SetupActivity.class));
+            return true;
+        } else if (id == R.id.menu_zebra_licence) {
+            startActivity(new Intent(this, ZebraLicenceActivity.class));
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onResume() {
         mMainActivity = this;
         super.onResume();
-        updateSwitches();
         launchPowerEventsWatcherServiceIfNecessary();
     }
 
@@ -324,31 +238,6 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    public void updateSwitches()
-    {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if(ScreenSaverService.isRunning(MainActivity.this))
-                {
-                    setServiceStartedSwitchValues(true, getString(R.string.serviceStarted));
-                }
-                else
-                {
-                    setServiceStartedSwitchValues(false, getString(R.string.serviceStopped));
-                }
-
-                SharedPreferences sharedpreferences = getSharedPreferences(Constants.SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
-                boolean startServiceOnBoot = sharedpreferences.getBoolean(Constants.SHARED_PREFERENCES_START_SERVICE_ON_BOOT, false);
-                setAutoStartServiceOnBootSwitch(startServiceOnBoot, startServiceOnBoot ? getString(R.string.startOnBoot) : getString(R.string.doNothingOnBoot));
-
-                boolean startServiceOnCharging = sharedpreferences.getBoolean(Constants.SHARED_PREFERENCES_START_SERVICE_ON_CHARGING, false);
-                setAutoStartServiceOnChargingSwitch(startServiceOnCharging, startServiceOnCharging ? getString(R.string.startOnCharging) : getString(R.string.doNothingOnCharging));
-            }
-        });
-
-    }
-
     private void launchPowerEventsWatcherServiceIfNecessary()
     {
         // We need to launch the PowerEventsWatcher Service if necessary
@@ -373,31 +262,5 @@ public class MainActivity extends AppCompatActivity {
         super.onPause();
     }
 
-    private void setServiceStartedSwitchValues(final boolean checked, final String text)
-    {
-        mStartStopServiceSwitch.setChecked(checked);
-        mStartStopServiceSwitch.setText(text);
-    }
 
-    private void setAutoStartServiceOnBootSwitch(final boolean checked, final String text)
-    {
-        mAutoStartServiceOnBootSwitch.setChecked(checked);
-        mAutoStartServiceOnBootSwitch.setText(text);
-    }
-
-    private void setAutoStartServiceOnChargingSwitch(final boolean checked, final String text)
-    {
-        mAutoStartServiceOnCraddleSwitch.setChecked(checked);
-        mAutoStartServiceOnCraddleSwitch.setText(text);
-    }
-
-
-    public static void updateGUISwitchesIfNecessary()
-    {
-        // Update GUI if necessary
-        if(MainActivity.mMainActivity != null) // The application default activity has been opened
-        {
-            MainActivity.mMainActivity.updateSwitches();
-        }
-    }
 }

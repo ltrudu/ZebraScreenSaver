@@ -11,6 +11,6 @@ public class StopServiceBroadcastReceiver extends BroadcastReceiver {
         Log.d(Constants.TAG, "StopServiceBroadcastReceiver::onReceive");
         // Stop service
         ScreenSaverService.stopService(context);
-        MainActivity.updateGUISwitchesIfNecessary();
+        SetupActivity.updateGUI();
     }
 }

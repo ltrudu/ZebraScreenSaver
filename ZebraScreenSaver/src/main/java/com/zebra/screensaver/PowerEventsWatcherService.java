@@ -10,14 +10,15 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.ServiceCompat;
 import androidx.core.app.TaskStackBuilder;
 import android.util.Log;
 
-import static android.app.PendingIntent.FLAG_UPDATE_CURRENT;
 import static androidx.core.app.NotificationCompat.PRIORITY_MIN;
 
 public class PowerEventsWatcherService extends Service {
@@ -71,11 +72,11 @@ public class PowerEventsWatcherService extends Service {
                     getApplicationContext(),
                     0,
                     mainActivityIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
             // Create the Foreground Service
             NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            String channelId = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? createNotificationChannel(notificationManager) : "";
+            String channelId = createNotificationChannel(notificationManager);
 
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, channelId);
             mNotification = notificationBuilder.setOngoing(true)
@@ -91,17 +92,19 @@ public class PowerEventsWatcherService extends Service {
             TaskStackBuilder localTaskStackBuilder = TaskStackBuilder.create(this);
             localTaskStackBuilder.addParentStack(MainActivity.class);
             localTaskStackBuilder.addNextIntent(mainActivityIntent);
-            notificationBuilder.setContentIntent(localTaskStackBuilder.getPendingIntent(0, FLAG_UPDATE_CURRENT));
+            notificationBuilder.setContentIntent(localTaskStackBuilder.getPendingIntent(0,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
 
-            // Start foreground service
-            startForeground(SERVICE_ID, mNotification);
+            // Start foreground service with specialUse type
+            ServiceCompat.startForeground(this, SERVICE_ID, mNotification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
 
             // Register Power Actions Receiver
             // Register power connected and disconnected broadcast receiver
             IntentFilter myIntentFilter = new IntentFilter();
             myIntentFilter.addAction(Intent.ACTION_POWER_CONNECTED);
             myIntentFilter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-            registerReceiver(mPowerConnectionReceiver, myIntentFilter);
+            registerReceiver(mPowerConnectionReceiver, myIntentFilter, Context.RECEIVER_NOT_EXPORTED);
 
             logD("PowerEventsWatcherService::startService:Service started without error.");
         }
@@ -149,17 +152,7 @@ public class PowerEventsWatcherService extends Service {
     public static void startService(Context context)
     {
         Intent myIntent = new Intent(context, PowerEventsWatcherService.class);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-        {
-            // Use start foreground service to prevent the runtime error:
-            // "not allowed to start service intent app is in background"
-            // to happen when running on OS >= Oreo
-            context.startForegroundService(myIntent);
-        }
-        else
-        {
-            context.startService(myIntent);
-        }
+        context.startForegroundService(myIntent);
     }
 
     public static void stopService(Context context)

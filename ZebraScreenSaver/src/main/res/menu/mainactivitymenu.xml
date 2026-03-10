@@ -4,6 +4,4 @@
         android:title="Settings" />
     <item android:id="@+id/menu_zebra_licence"
         android:title="Zebra Licence" />
-    <item android:id="@+id/menu_plasma_licence"
-        android:title="Plasma Licence" />
 </menu>
